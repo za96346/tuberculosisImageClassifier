@@ -1,80 +1,109 @@
+import os
 import tensorflow as tf
-from tensorflow.keras.applications import VGG19
-from tensorflow.keras import layers, models
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.optimizers import Adam
+from keras import layers, models
+import numpy as np
+from sklearn.model_selection import train_test_split
+from keras.api.applications import VGG16
+from keras._tf_keras.keras.preprocessing.image import ImageDataGenerator
+
+data_dir = 'TB_Chest_Radiography_Database/'  # 数据主目录
+classes = ['Normal', 'Tuberculosis']  # 类别名
+image_paths = []
+labels = []
+
+# 遍历文件夹，收集图像路径和对应标签
+for label, class_name in enumerate(classes):
+    class_dir = os.path.join(data_dir, class_name)
+    for file_name in os.listdir(class_dir):
+        image_paths.append(os.path.join(class_dir, file_name))
+        labels.append(label)
+
+# 划分为训练集和测试集
+train_paths, test_paths, train_labels, test_labels = train_test_split(
+    image_paths, labels, test_size=0.2, random_state=42, stratify=labels)
+
+# 进一步将训练集划分为训练集和验证集
+train_paths, val_paths, train_labels, val_labels = train_test_split(
+    train_paths, train_labels, test_size=0.25, random_state=42, stratify=train_labels)  # 验证集占 25%
 
 
-# 載入 VGG-19 模型，設定 include_top=False 以移除預設的分類層
-vgg19_base = VGG19(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
-
-# 鎖定 VGG19 預訓練的層，這樣它們不會在訓練中被更新
-vgg19_base.trainable = False
-
-# 建立自定義的分類層
-model = models.Sequential()
-model.add(vgg19_base)
-model.add(layers.Flatten())
-model.add(layers.Dense(256, activation='relu'))
-model.add(layers.Dense(1, activation='sigmoid'))  # 假設二元分類，根據需要調整為多分類
-
-# 編譯模型
-model.compile(optimizer=Adam(learning_rate=0.0001), loss='binary_crossentropy', metrics=['accuracy'])
-
-model.summary()
-
-
+# 创建数据增强器
 train_datagen = ImageDataGenerator(
-    rescale=1./255,
-    rotation_range=40,
+    rescale=1./255,           # 归一化像素值
+    rotation_range=40,        # 数据增强参数
     width_shift_range=0.2,
     height_shift_range=0.2,
     shear_range=0.2,
     zoom_range=0.2,
-    horizontal_flip=True
+    horizontal_flip=True,
+    fill_mode='nearest'
 )
 
-validation_datagen = ImageDataGenerator(rescale=1./255)
+# 验证和测试集不做数据增强，只进行归一化
+val_test_datagen = ImageDataGenerator(rescale=1./255)
 
-train_generator = train_datagen.flow_from_directory(
-    'dataset/train',
-    target_size=(224, 224),
-    batch_size=32,
-    class_mode='binary'
-)
+def image_generator(image_paths, labels, batch_size, datagen):
+    while True:
+        for start in range(0, len(image_paths), batch_size):
+            end = min(start + batch_size, len(image_paths))
+            batch_paths = image_paths[start:end]
+            batch_labels = labels[start:end]
+            
+            # 加载图像并应用预处理
+            batch_images = [tf.keras.preprocessing.image.load_img(img_path, target_size=(224, 224)) for img_path in batch_paths]
+            batch_images = np.array([tf.keras.preprocessing.image.img_to_array(img) for img in batch_images])
+            
+            # 使用 ImageDataGenerator 对图像进行处理
+            batch_images = datagen.flow(batch_images, batch_size=len(batch_images), shuffle=False)[0]
+            
+            yield batch_images, np.array(batch_labels)
 
-validation_generator = validation_datagen.flow_from_directory(
-    'dataset/validation',
-    target_size=(224, 224),
-    batch_size=32,
-    class_mode='binary'
-)
+batch_size = 32
 
+# 生成器
+train_generator = image_generator(train_paths, train_labels, batch_size, train_datagen)
+val_generator = image_generator(val_paths, val_labels, batch_size, val_test_datagen)
+test_generator = image_generator(test_paths, test_labels, batch_size, val_test_datagen)
 
+# 假设你已经定义好了模型
+steps_per_epoch_train = len(train_paths) // batch_size
+steps_per_epoch_val = len(val_paths) // batch_size
+steps_per_epoch_test = len(test_paths) // batch_size
+
+# 加载 VGG16 模型，去掉顶层全连接层 (include_top=False)
+base_model = VGG16(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
+
+# 冻结 VGG16 的卷积层
+base_model.trainable = False
+
+# 创建自己的模型，在 VGG16 基础上添加全连接层
+model = models.Sequential()
+model.add(base_model)
+model.add(layers.Flatten())
+model.add(layers.Dense(4096, activation='relu'))
+model.add(layers.Dense(4096, activation='relu'))
+model.add(layers.Dense(2, activation='softmax'))  # 假设是二分类
+
+# 打印模型摘要
+model.summary()
+
+# 编译模型
+model.compile(optimizer='adam',              # 优化器
+              loss='sparse_categorical_crossentropy',  # 损失函数，适用于多分类问题
+              metrics=['accuracy'])          # 评估指标
+
+# 开始训练
 history = model.fit(
-    train_generator,
-    steps_per_epoch=100,
-    epochs=10,
-    validation_data=validation_generator,
-    validation_steps=50
+    train_generator,                         # 训练数据生成器
+    steps_per_epoch=steps_per_epoch_train,   # 每个 epoch 的步骤数
+    validation_data=val_generator,           # 验证数据生成器
+    validation_steps=steps_per_epoch_val,    # 验证集的步骤数
+    epochs=50                                # 训练的 epoch 数
 )
 
-# 儲存模型
-model.save('vgg19_finetuned_model.h5')
+# 保存模型
+model.save('my_vgg16_model.h5')
 
-
-# 解鎖 VGG-19 的部分層
-for layer in vgg19_base.layers[-4:]:
-    layer.trainable = True
-
-# 重新編譯模型，使用更小的學習率
-model.compile(optimizer=Adam(lr=1e-5), loss='binary_crossentropy', metrics=['accuracy'])
-
-# 繼續訓練
-history_finetune = model.fit(
-    train_generator,
-    steps_per_epoch=100,
-    epochs=10,
-    validation_data=validation_generator,
-    validation_steps=50
-)
+# 在测试集上评估模型
+test_loss, test_acc = model.evaluate(test_generator, steps=steps_per_epoch_test)
+print(f"Test accuracy: {test_acc}")
