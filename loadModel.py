@@ -21,15 +21,28 @@ last_conv_layer = vgg16_model.get_layer('block5_conv3')
 intermediate_model = Model(inputs=vgg16_model.input, outputs=last_conv_layer.output)
 
 # 加载和预处理图片
-img_path = '/Users/siou/Downloads/code/TuberculosisImageClassifier/TB_Chest_Radiography_Database/Tuberculosis/Tuberculosis-677.png'  # 替换为你的测试图像路径
-img = image.load_img(img_path, target_size=(512, 512))
-img = np.asarray(img)
-plt.imshow(img)
+img_path = '/Users/siou/Downloads/code/TuberculosisImageClassifier/TB_Chest_Radiography_Database/Tuberculosis/Tuberculosis-677.png'
+img = image.load_img(img_path, target_size=(224, 224))
+img_array = image.img_to_array(img)
+img_array = np.expand_dims(img_array, axis=0)
+img_array /= 255.0
 
-img = np.expand_dims(img, axis=0)
+conv_output = intermediate_model.predict(img_array)
 
+classifier_weights = model.get_layer('dense_2').get_weights()[0]
 
+predicted_class = np.argmax(model.predict(img_array), axis=-1)[0]
 
+class_weights = classifier_weights[:, predicted_class]
 
+cam_output = np.dot(conv_output[0], class_weights)
 
+cam_output = np.maximum(cam_output, 0)
+cam_output = cam_output / cam_output.max()
+
+cam_output = tf.image.resize(cam_output[..., np.newaxis], (224, 224))
+
+plt.imshow(tf.keras.preprocessing.image.array_to_img(img_array[0]))
+plt.imshow(cam_output, cmap='jet', alpha=0.5)
+plt.colorbar()
 plt.show()
