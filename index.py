@@ -130,4 +130,4 @@ model.fit(
     validation_data=(np.array(X_test), np.array(y_test))
 )
 
-model.save("TuberculosisImageClassifier.h5")
+model.save("TuberculosisImageClassifier.keras")
