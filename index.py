@@ -2,12 +2,7 @@ import numpy as np # linear algebra
 import pandas as pd
 import os
 import cv2
-from pathlib import Path
-import seaborn as sns
-import matplotlib.pyplot as plt
-from skimage.io import imread
 from tqdm import tqdm
-from keras.api.utils import to_categorical
 from imblearn.over_sampling import SMOTE
 from sklearn.model_selection import train_test_split
 from keras import layers, Sequential, models, losses
@@ -43,7 +38,7 @@ def transImage(label, images):
     tq.set_description(f"[{label}]圖像轉換成matrix")
     for img in tq:
         img = cv2.imread(str(img))
-        img = cv2.resize(img, (28,28))
+        img = cv2.resize(img, (224,224))
         if img.shape[2] == 1:
             img = np.dstack([img, img, img])
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -77,7 +72,7 @@ train_data2, train_labels2 = smt.fit_resample(train_data1, train_labels1)
 
 cases_count1 = train_labels2['label'].value_counts()
 
-train_data2 =train_data2.reshape(-1,28,28,3)
+train_data2 =train_data2.reshape(-1,224,224,3)
 
 X_train, X_test, y_train, y_test = train_test_split(train_data2, train_labels2, test_size=0.13, random_state=42)
 
@@ -86,7 +81,7 @@ data_augmentation = Sequential(
     [
         layers.RandomFlip(
             "horizontal",
-            input_shape=(28, 28, 3)
+            input_shape=(224, 224, 3)
         ),
         layers.RandomRotation(0.1),
         layers.RandomZoom(0.1),
@@ -95,31 +90,30 @@ data_augmentation = Sequential(
 
 model = models.Sequential([
     data_augmentation,
-    layers.Conv2D(28, (3, 3), activation='relu', input_shape=(28, 28, 3)) ,
+    layers.Conv2D(32, (3, 3), activation='relu'),
+    layers.BatchNormalization(),
     layers.MaxPooling2D((2, 2)),
     layers.Conv2D(64, (3, 3), activation='relu'),
+    layers.BatchNormalization(),
     layers.MaxPooling2D((2, 2)),
-    layers.Conv2D(64, (3, 3), activation='relu')
-    
+    layers.Conv2D(128, (3, 3), activation='relu'),
+    layers.BatchNormalization(),
+    layers.MaxPooling2D((2, 2)),
+    layers.Flatten(),
+    layers.Dense(256, activation='relu'),
+    layers.Dropout(0.5),
+    layers.Dense(128, activation='relu'),
+    layers.Dropout(0.5),
+    layers.Dense(2, activation='softmax')
 ])
 
-model.summary()
 
-# 添加 fc layer
-model.add(layers.Flatten())
-model.add(layers.Dense(640, activation='tanh'))
-model.add(layers.Dropout(0.5))
-model.add(layers.Dense(564, activation='tanh'))
-model.add(layers.Dropout(0.5))
-model.add(layers.Dense(64, activation='tanh'))
-model.add(layers.Dense(64, activation='sigmoid'))
-model.add(layers.Dense(2))
 model.summary()
 
 # complie and train
 model.compile(
     optimizer='adam',
-    loss=losses.SparseCategoricalCrossentropy(from_logits=True),
+    loss=losses.SparseCategoricalCrossentropy(from_logits=False),
     metrics=['accuracy']
 )
 
