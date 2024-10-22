@@ -1,1 +1,1 @@
-from .index import GoogleNetImplement
+from .index import ModelImplement

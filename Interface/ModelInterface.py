@@ -2,23 +2,49 @@ from abc import ABC, abstractmethod
 
 class ModelInterface(ABC):
     @abstractmethod
-    def __init__(
+    def setup(
+        self,
         datasetsDir: str,
         modelSavePath: str
     ) -> None:
-        super().__init__()
+        """
+            初始化設定
+            datasetsDir: 資料集位置
+            modelSavePath: 模型儲存位置
+        """
         pass
 
-    """
-        載入模型
-    """
     @abstractmethod
-    def loadModel() -> None:
+    def loadModel(self) -> None:
+        """
+            載入模型
+        """
         pass
 
-    """
-        開始訓練
-    """
     @abstractmethod
-    def startTraining() -> None:
+    def startTraining(self) -> None:
+        """
+            開始訓練
+        """
+        pass
+
+    @abstractmethod
+    def predict(self, imagePath: str) -> None:
+        """
+            預測
+        """
+        pass
+
+    @abstractmethod
+    def evaluate(self) -> None:
+        """
+            評估模型
+        """
+        pass
+
+    @abstractmethod
+    def gradCam(self) -> None:
+        """
+            顯示熱力圖
+        """
         pass

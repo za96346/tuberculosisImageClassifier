@@ -1,1 +1,1 @@
-from .index import VGG16Implement
+from .index import ModelImplement

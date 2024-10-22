@@ -1,0 +1,28 @@
+{
+    "models": {
+        "vgg16": {
+            "datasetsDir": "",
+            "modelSavePath": "",
+            "traning": true,
+            "enable": true
+        },
+        "denseNet": {
+            "datasetsDir": "",
+            "modelSavePath": "",
+            "traning": true,
+            "enable": true
+        },
+        "googleNet": {
+            "datasetsDir": "",
+            "modelSavePath": "",
+            "traning": true,
+            "enable": true
+        },
+        "transformer": {
+            "datasetsDir": "",
+            "modelSavePath": "",
+            "traning": true,
+            "enable": true
+        }
+    }
+}

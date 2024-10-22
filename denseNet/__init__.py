@@ -1,1 +1,1 @@
-from .index import DenseNetImplement
+from .index import ModelImplement

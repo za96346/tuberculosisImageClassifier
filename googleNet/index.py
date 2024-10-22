@@ -1,5 +1,5 @@
-from ..Interface import ModelInterface
+from Interface import BaseModel
 
-class GoogleNetImplement(ModelInterface):
+class ModelImplement(BaseModel):
     def __init__(self):
-        pass
+        super().__init__()
