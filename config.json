@@ -9,20 +9,20 @@
         "denseNet": {
             "datasetsDir": "./TB_Chest_Radiography_Database",
             "modelSavePath": "./DenseNet/model.h5",
-            "traning": true,
-            "enable": true
+            "traning": false,
+            "enable": false
         },
         "googleNet": {
             "datasetsDir": "./TB_Chest_Radiography_Database",
             "modelSavePath": "./GoogleNet/model.h5",
-            "traning": true,
-            "enable": true
+            "traning": false,
+            "enable": false
         },
         "transformer": {
             "datasetsDir": "./TB_Chest_Radiography_Database",
             "modelSavePath": "./Transformer/model.h5",
-            "traning": true,
-            "enable": true
+            "traning": false,
+            "enable": false
         }
     }
 }

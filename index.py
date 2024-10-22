@@ -17,7 +17,6 @@ googleNetImplement: Interface.ModelInterface = GoogleNet.ModelImplement() if mod
 transformerImplement: Interface.ModelInterface = Transformer.ModelImplement() if modelConfig["transformer"]["enable"] else Interface.BaseModel()
 denseNetImplement: Interface.ModelInterface = DenseNet.ModelImplement() if modelConfig["denseNet"]["enable"] else Interface.BaseModel()
 
-# 資料統一預處理 ( 如果需要 )
 if modelConfig["vgg16"]["traning"]:
     vgg16Implement.setup(
         modelConfig["vgg16"]["datasetsDir"],
