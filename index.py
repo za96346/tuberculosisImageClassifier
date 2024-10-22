@@ -19,15 +19,31 @@ denseNetImplement: Interface.ModelInterface = DenseNet.ModelImplement() if model
 
 # 資料統一預處理 ( 如果需要 )
 if modelConfig["vgg16"]["traning"]:
+    vgg16Implement.setup(
+        modelConfig["vgg16"]["datasetsDir"],
+        modelConfig["vgg16"]["modelSavePath"],
+    )
     vgg16Implement.startTraining()
 
 if modelConfig["googleNet"]["traning"]:
+    googleNetImplement.setup(
+        modelConfig["googleNet"]["datasetsDir"],
+        modelConfig["googleNet"]["modelSavePath"],
+    )
     googleNetImplement.startTraining()
 
 if modelConfig["transformer"]["traning"]:
+    transformerImplement.setup(
+        modelConfig["transformer"]["datasetsDir"],
+        modelConfig["transformer"]["modelSavePath"],
+    )
     transformerImplement.startTraining()
 
 if modelConfig["denseNet"]["traning"]:
+    denseNetImplement.setup(
+        modelConfig["denseNet"]["datasetsDir"],
+        modelConfig["denseNet"]["modelSavePath"],
+    )
     denseNetImplement.startTraining()
 
 # 使用評估指標評比以上模型

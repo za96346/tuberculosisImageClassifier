@@ -1,26 +1,26 @@
 {
     "models": {
         "vgg16": {
-            "datasetsDir": "",
-            "modelSavePath": "",
+            "datasetsDir": "./TB_Chest_Radiography_Database",
+            "modelSavePath": "./VGG16/model.h5",
             "traning": true,
             "enable": true
         },
         "denseNet": {
-            "datasetsDir": "",
-            "modelSavePath": "",
+            "datasetsDir": "./TB_Chest_Radiography_Database",
+            "modelSavePath": "./DenseNet/model.h5",
             "traning": true,
             "enable": true
         },
         "googleNet": {
-            "datasetsDir": "",
-            "modelSavePath": "",
+            "datasetsDir": "./TB_Chest_Radiography_Database",
+            "modelSavePath": "./GoogleNet/model.h5",
             "traning": true,
             "enable": true
         },
         "transformer": {
-            "datasetsDir": "",
-            "modelSavePath": "",
+            "datasetsDir": "./TB_Chest_Radiography_Database",
+            "modelSavePath": "./Transformer/model.h5",
             "traning": true,
             "enable": true
         }
