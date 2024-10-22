@@ -4,11 +4,12 @@ from tqdm import tqdm
 from .ModelInterface import ModelInterface
 import tensorflow as tf
 
+
 class BaseModel(ModelInterface):
-    datasetsDir: str # 資料夾
-    modelSavePath: str # 模型儲存位置
-    normalImageList: list[cv2.typing.MatLike] # 正常影像matLike list
-    tuberculosisImageList: list[cv2.typing.MatLike] # 肺結核影像matLike list
+    datasetsDir: str  # 資料夾
+    modelSavePath: str  # 模型儲存位置
+    normalImageList: list[cv2.typing.MatLike]  # 正常影像matLike list
+    tuberculosisImageList: list[cv2.typing.MatLike]  # 肺結核影像matLike list
 
     def __init__(self):
         self.__useGPU__()
@@ -16,7 +17,9 @@ class BaseModel(ModelInterface):
 
     # 使用gpu
     def __useGPU__(self):
-        print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+        print(
+            "Num GPUs Available: ", len(
+                tf.config.list_physical_devices('GPU')))
 
         gpus = tf.config.list_physical_devices('GPU')
         if gpus:
@@ -27,7 +30,8 @@ class BaseModel(ModelInterface):
                 print(e)
 
     # resize image and let it to matLike
-    def __imageToMatLike__(self, imageFolderPath: str) -> list[cv2.typing.MatLike]:
+    def __imageToMatLike__(self,
+                           imageFolderPath: str) -> list[cv2.typing.MatLike]:
         data = []
         tq = tqdm(os.listdir(imageFolderPath))
         tq.set_description(f"圖像預處理 ({imageFolderPath}): ")
@@ -38,14 +42,16 @@ class BaseModel(ModelInterface):
             data.append(img)
 
         return data
-    
+
     def setup(self, datasetsDir, modelSavePath):
         self.datasetsDir = datasetsDir
         self.modelSavePath = modelSavePath
 
-        self.normalImageList = self.__imageToMatLike__(f"{self.datasetsDir}/Normal")
-        self.tuberculosisImageList = self.__imageToMatLike__(f"{self.datasetsDir}/Tuberculosis")
-    
+        self.normalImageList = self.__imageToMatLike__(
+            f"{self.datasetsDir}/Normal")
+        self.tuberculosisImageList = self.__imageToMatLike__(
+            f"{self.datasetsDir}/Tuberculosis")
+
     def loadModel(self):
         pass
 

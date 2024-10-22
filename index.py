@@ -1,4 +1,4 @@
-import json 
+import json
 import Interface
 import VGG16
 import Transformer
@@ -12,10 +12,14 @@ with open('./config.json') as f:
 modelConfig = data["models"]
 
 # instance
-vgg16Implement: Interface.ModelInterface = VGG16.ModelImplement() if modelConfig["vgg16"]["enable"] else Interface.BaseModel()
-googleNetImplement: Interface.ModelInterface = GoogleNet.ModelImplement() if modelConfig["googleNet"]["enable"] else Interface.BaseModel()
-transformerImplement: Interface.ModelInterface = Transformer.ModelImplement() if modelConfig["transformer"]["enable"] else Interface.BaseModel()
-denseNetImplement: Interface.ModelInterface = DenseNet.ModelImplement() if modelConfig["denseNet"]["enable"] else Interface.BaseModel()
+vgg16Implement: Interface.ModelInterface = VGG16.ModelImplement(
+) if modelConfig["vgg16"]["enable"] else Interface.BaseModel()
+googleNetImplement: Interface.ModelInterface = GoogleNet.ModelImplement(
+) if modelConfig["googleNet"]["enable"] else Interface.BaseModel()
+transformerImplement: Interface.ModelInterface = Transformer.ModelImplement(
+) if modelConfig["transformer"]["enable"] else Interface.BaseModel()
+denseNetImplement: Interface.ModelInterface = DenseNet.ModelImplement(
+) if modelConfig["denseNet"]["enable"] else Interface.BaseModel()
 
 if modelConfig["vgg16"]["traning"]:
     vgg16Implement.setup(

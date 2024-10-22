@@ -39,7 +39,7 @@ train_paths, val_paths, train_labels, val_labels = train_test_split(
 
 # 创建数据增强器
 train_datagen = ImageDataGenerator(
-    rescale=1./255,           # 归一化像素值
+    rescale=1. / 255,           # 归一化像素值
     rotation_range=40,        # 数据增强参数
     width_shift_range=0.2,
     height_shift_range=0.2,
@@ -50,7 +50,8 @@ train_datagen = ImageDataGenerator(
 )
 
 # 验证和测试集不做数据增强，只进行归一化
-val_test_datagen = ImageDataGenerator(rescale=1./255)
+val_test_datagen = ImageDataGenerator(rescale=1. / 255)
+
 
 def image_generator(image_paths, labels, batch_size, datagen):
     while True:
@@ -58,22 +59,42 @@ def image_generator(image_paths, labels, batch_size, datagen):
             end = min(start + batch_size, len(image_paths))
             batch_paths = image_paths[start:end]
             batch_labels = labels[start:end]
-            
+
             # 加载图像并应用预处理
-            batch_images = [tf.keras.preprocessing.image.load_img(img_path, target_size=(224, 224)) for img_path in batch_paths]
-            batch_images = np.array([tf.keras.preprocessing.image.img_to_array(img) for img in batch_images])
-            
+            batch_images = [
+                tf.keras.preprocessing.image.load_img(
+                    img_path, target_size=(
+                        224, 224)) for img_path in batch_paths]
+            batch_images = np.array(
+                [tf.keras.preprocessing.image.img_to_array(img) for img in batch_images])
+
             # 使用 ImageDataGenerator 对图像进行处理
-            batch_images = datagen.flow(batch_images, batch_size=len(batch_images), shuffle=False)[0]
-            
+            batch_images = datagen.flow(
+                batch_images,
+                batch_size=len(batch_images),
+                shuffle=False)[0]
+
             yield batch_images, np.array(batch_labels)
+
 
 batch_size = 32
 
 # 生成器
-train_generator = image_generator(train_paths, train_labels, batch_size, train_datagen)
-val_generator = image_generator(val_paths, val_labels, batch_size, val_test_datagen)
-test_generator = image_generator(test_paths, test_labels, batch_size, val_test_datagen)
+train_generator = image_generator(
+    train_paths,
+    train_labels,
+    batch_size,
+    train_datagen)
+val_generator = image_generator(
+    val_paths,
+    val_labels,
+    batch_size,
+    val_test_datagen)
+test_generator = image_generator(
+    test_paths,
+    test_labels,
+    batch_size,
+    val_test_datagen)
 
 # 假设你已经定义好了模型
 steps_per_epoch_train = len(train_paths) // batch_size
@@ -81,7 +102,13 @@ steps_per_epoch_val = len(val_paths) // batch_size
 steps_per_epoch_test = len(test_paths) // batch_size
 
 # 加载 VGG16 模型，去掉顶层全连接层 (include_top=False)
-base_model = VGG16(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
+base_model = VGG16(
+    weights='imagenet',
+    include_top=False,
+    input_shape=(
+        224,
+        224,
+        3))
 
 # 冻结 VGG16 的卷积层
 base_model.trainable = False
@@ -115,5 +142,6 @@ history = model.fit(
 model.save('my_vgg16_model.h5')
 
 # 在测试集上评估模型
-test_loss, test_acc = model.evaluate(test_generator, steps=steps_per_epoch_test)
+test_loss, test_acc = model.evaluate(
+    test_generator, steps=steps_per_epoch_test)
 print(f"Test accuracy: {test_acc}")

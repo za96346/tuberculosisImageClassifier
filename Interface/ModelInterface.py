@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class ModelInterface(ABC):
     @abstractmethod
     def setup(

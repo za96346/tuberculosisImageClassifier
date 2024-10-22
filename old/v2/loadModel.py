@@ -8,6 +8,7 @@ import numpy as np
 import cv2
 import sys
 
+
 def load_image(path):
     img = image.load_img(path, target_size=(224, 224))
     x = image.img_to_array(img)
@@ -26,4 +27,5 @@ preprocessed_input = load_image(sys.argv[1])
 predictions = model.predict(preprocessed_input)
 print(predictions)
 predicted_class = np.argmax(predictions)
-print(f"Predicted class: {predicted_class} with confidence {predictions[0][predicted_class]:.2f}")
+print(f"Predicted class: {predicted_class} with confidence {
+      predictions[0][predicted_class]:.2f}")

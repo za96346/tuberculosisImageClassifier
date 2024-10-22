@@ -8,12 +8,15 @@ import numpy as np
 import cv2
 import sys
 
+
 def target_category_loss(x, category_index, nb_classes):
     return tf.multiply(x, K.one_hot([category_index], nb_classes))
+
 
 def normalize(x):
     # Normalizes a tensor by its L2 norm
     return x / (K.sqrt(K.mean(K.square(x))) + 1e-5)
+
 
 def load_image(path):
     img = image.load_img(path, target_size=(224, 224))
@@ -22,15 +25,18 @@ def load_image(path):
     x = preprocess_input(x)
     return x
 
+
 def grad_cam(input_model, image, category_index, layer_name):
     nb_classes = 2  # 假設你訓練的是二分類
-    target_layer = lambda x: target_category_loss(x, category_index, nb_classes)
-    
+    def target_layer(x): return target_category_loss(
+        x, category_index, nb_classes)
+
     with tf.GradientTape() as tape:
-        conv_output = [l for l in input_model.layers if l.name == layer_name][0].output
+        conv_output = [
+            l for l in input_model.layers if l.name == layer_name][0].output
         loss = K.sum(target_layer(conv_output))
         grads = tape.gradient(loss, conv_output)
-    
+
     grads = normalize(grads[0])
     conv_output = conv_output[0].numpy()
     grads = grads.numpy()
@@ -48,8 +54,9 @@ def grad_cam(input_model, image, category_index, layer_name):
     cam = cv2.applyColorMap(np.uint8(255 * heatmap), cv2.COLORMAP_JET)
     cam = np.float32(cam) + np.float32(image[0])
     cam = 255 * cam / np.max(cam)
-    
+
     return np.uint8(cam), heatmap
+
 
 def deprocess_image(x):
     x = np.squeeze(x)
@@ -65,6 +72,7 @@ def deprocess_image(x):
     x = np.clip(x, 0, 255).astype('uint8')
     return x
 
+
 # Load your custom VGG16 model
 model_path = "my_vgg16_model.h5"  # 替換成你的自定義模型文件路徑
 model = load_model(model_path)
@@ -75,10 +83,12 @@ preprocessed_input = load_image(sys.argv[1])
 # Predict
 predictions = model.predict(preprocessed_input)
 predicted_class = np.argmax(predictions)
-print(f"Predicted class: {predicted_class} with confidence {predictions[0][predicted_class]:.2f}")
+print(f"Predicted class: {predicted_class} with confidence {
+      predictions[0][predicted_class]:.2f}")
 
 # Generate Grad-CAM
-cam, heatmap = grad_cam(model, preprocessed_input, predicted_class, "block5_conv3")
+cam, heatmap = grad_cam(model, preprocessed_input,
+                        predicted_class, "block5_conv3")
 cv2.imwrite("gradcam.jpg", cam)
 
 # Save Guided Grad-CAM

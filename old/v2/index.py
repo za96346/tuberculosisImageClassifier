@@ -26,6 +26,8 @@ no_tb_data = "./TB_Chest_Radiography_Database/Normal"
 tb_data = "./TB_Chest_Radiography_Database/Tuberculosis"
 
 # resize image and let it to matLike
+
+
 def imagePreprocess(imageFolderPath: str):
     data = []
     tq = tqdm(os.listdir(imageFolderPath))
@@ -37,6 +39,7 @@ def imagePreprocess(imageFolderPath: str):
         data.append(img)
 
     return data
+
 
 tb_image = np.array(imagePreprocess(tb_data))
 no_image = imagePreprocess(no_tb_data)
@@ -52,12 +55,12 @@ datagen = ImageDataGenerator(
 
 aug_images = []
 for image in tqdm(tb_image):
-    image = np.expand_dims(image, axis=0)  
+    image = np.expand_dims(image, axis=0)
     i = 0
     for batch in datagen.flow(image, batch_size=1):
-        aug_images.append(batch[0])  
+        aug_images.append(batch[0])
         i += 1
-        if i >= 5:  
+        if i >= 5:
             break
 
 TB_yes = []
@@ -92,30 +95,33 @@ y_test = y[5500:7000]
 
 # model 模型建構
 model = Sequential()
-model.add(Conv2D(100,(3, 3), activation = "relu", input_shape = (224, 224, 3)))
+model.add(Conv2D(100, (3, 3), activation="relu", input_shape=(224, 224, 3)))
 model.add(MaxPooling2D(2, 2))
 
-model.add(Conv2D(100,(3, 3), activation = "relu"))
+model.add(Conv2D(100, (3, 3), activation="relu"))
 model.add(MaxPooling2D(2, 2))
 
-model.add(Conv2D(64,(3, 3), activation = "relu"))
-#model.add(MaxPooling2D(2, 2))
+model.add(Conv2D(64, (3, 3), activation="relu"))
+# model.add(MaxPooling2D(2, 2))
 
-model.add(Conv2D(64,(3, 3), activation = "relu"))
+model.add(Conv2D(64, (3, 3), activation="relu"))
 model.add(MaxPooling2D(2, 2))
 
 model.add(Flatten())
-model.add(Dense(64, activation = "relu"))
+model.add(Dense(64, activation="relu"))
 model.add(Dropout(.2))
-#model.add(Dense(32, activation = "relu"))
+# model.add(Dense(32, activation = "relu"))
 model.add(Dropout(.3))
-model.add(Dense(32, activation = "relu"))
-model.add(Dense(1, activation = 'sigmoid'))
+model.add(Dense(32, activation="relu"))
+model.add(Dense(1, activation='sigmoid'))
 
 
-model.compile(optimizer="adam", loss='binary_crossentropy', metrics=['accuracy'])
+model.compile(
+    optimizer="adam",
+    loss='binary_crossentropy',
+    metrics=['accuracy'])
 
-history = model.fit(x_train, y_train, validation_split= .2, epochs = 5)
+history = model.fit(x_train, y_train, validation_split=.2, epochs=5)
 
 
 # loss and accuracy plot
