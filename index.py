@@ -13,36 +13,37 @@ modelConfig = data["models"]
 
 # instance
 vgg16Implement: Interface.ModelInterface = VGG16.ModelImplement(
-) if modelConfig["vgg16"]["enable"] else Interface.BaseModel()
+    input_shape=(224,224,3)
+) if modelConfig["vgg16"]["enable"] else None
 googleNetImplement: Interface.ModelInterface = GoogleNet.ModelImplement(
-) if modelConfig["googleNet"]["enable"] else Interface.BaseModel()
+) if modelConfig["googleNet"]["enable"] else None
 transformerImplement: Interface.ModelInterface = Transformer.ModelImplement(
-) if modelConfig["transformer"]["enable"] else Interface.BaseModel()
+) if modelConfig["transformer"]["enable"] else None
 denseNetImplement: Interface.ModelInterface = DenseNet.ModelImplement(
-) if modelConfig["denseNet"]["enable"] else Interface.BaseModel()
+) if modelConfig["denseNet"]["enable"] else None
 
-if modelConfig["vgg16"]["traning"]:
+if modelConfig["vgg16"]["traning"] and vgg16Implement:
     vgg16Implement.setup(
         modelConfig["vgg16"]["datasetsDir"],
-        modelConfig["vgg16"]["modelSavePath"],
+        modelConfig["vgg16"]["modelSavePath"]
     )
-    vgg16Implement.startTraining()
+    vgg16Implement.startTraining(10, 50, 10)
 
-if modelConfig["googleNet"]["traning"]:
+if modelConfig["googleNet"]["traning"] and googleNetImplement:
     googleNetImplement.setup(
         modelConfig["googleNet"]["datasetsDir"],
         modelConfig["googleNet"]["modelSavePath"],
     )
     googleNetImplement.startTraining()
 
-if modelConfig["transformer"]["traning"]:
+if modelConfig["transformer"]["traning"] and transformerImplement:
     transformerImplement.setup(
         modelConfig["transformer"]["datasetsDir"],
         modelConfig["transformer"]["modelSavePath"],
     )
     transformerImplement.startTraining()
 
-if modelConfig["denseNet"]["traning"]:
+if modelConfig["denseNet"]["traning"] and denseNetImplement:
     denseNetImplement.setup(
         modelConfig["denseNet"]["datasetsDir"],
         modelConfig["denseNet"]["modelSavePath"],
