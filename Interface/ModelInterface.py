@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-
+from keras.api.models import Sequential
 
 class ModelInterface(ABC):
     @abstractmethod
@@ -23,9 +23,11 @@ class ModelInterface(ABC):
         pass
 
     @abstractmethod
-    def startTraining(self) -> None:
+    def startTraining(self, num_folds, epochs, batch_size) -> None:
         """
             開始訓練
+            Argus
+                num_folds: kfold 要切幾等份
         """
         pass
 
