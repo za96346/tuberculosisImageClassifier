@@ -29,3 +29,6 @@
 3. https://medium.com/@a26515969/nlp%E5%85%A5%E9%96%80-%E4%B8%80-transformer%E6%A8%A1%E5%9E%8B-ab7d77c80613
 4. https://keras.io/examples/vision/grad_cam/
 5. https://watson-john.medium.com/vgg16-introduction-and-implementation-e310c81f348b
+
+## command
+source myenv/bin/activate
