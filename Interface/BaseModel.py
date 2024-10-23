@@ -109,7 +109,7 @@ class BaseModel(ModelInterface):
             )
 
             # 每次訓練完成後可選擇保存模型
-            self.model.save(f'fold_{fold_no}_{self.modelSavePath}')
+            self.model.save(f'{self.modelSavePath}/model_fold_{fold_no}.h5')
 
             print(f'第 {fold_no} 折完成')
             fold_no += 1
