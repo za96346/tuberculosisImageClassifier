@@ -20,6 +20,7 @@ googleNetImplement: Interface.ModelInterface = GoogleNet.ModelImplement(
 transformerImplement: Interface.ModelInterface = Transformer.ModelImplement(
 ) if modelConfig["transformer"]["enable"] else None
 denseNetImplement: Interface.ModelInterface = DenseNet.ModelImplement(
+    input_shape=(224,224,3)
 ) if modelConfig["denseNet"]["enable"] else None
 
 if modelConfig["vgg16"]["traning"] and vgg16Implement:
@@ -48,7 +49,7 @@ if modelConfig["denseNet"]["traning"] and denseNetImplement:
         modelConfig["denseNet"]["datasetsDir"],
         modelConfig["denseNet"]["modelSavePath"],
     )
-    denseNetImplement.startTraining()
+    denseNetImplement.startTraining(10, 50, 10)
 
 # 使用評估指標評比以上模型
 vgg16Implement.evaluate()
