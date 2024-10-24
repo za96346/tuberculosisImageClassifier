@@ -114,7 +114,7 @@ class BaseModel(ModelInterface):
             )
 
             allHistory.append({
-                [fold_no]: history.history
+                fold_no: history.history
             })
 
             # 每次訓練完成後可選擇保存模型
