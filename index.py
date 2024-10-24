@@ -11,54 +11,27 @@ with open('./config.json') as f:
 
 modelConfig = data["models"]
 
-# instance
-vgg16Implement: Interface.ModelInterface = VGG16.ModelImplement(
-    input_shape=(224,224,3)
-) if modelConfig["vgg16"]["enable"] else None
-googleNetImplement: Interface.ModelInterface = GoogleNet.ModelImplement(
-) if modelConfig["googleNet"]["enable"] else None
-transformerImplement: Interface.ModelInterface = Transformer.ModelImplement(
-) if modelConfig["transformer"]["enable"] else None
-denseNetImplement: Interface.ModelInterface = DenseNet.ModelImplement(
-    input_shape=(224,224,3)
-) if modelConfig["denseNet"]["enable"] else None
+models: dict[str, Interface.ModelInterface] = {
+    "VGG16": VGG16.ModelImplement,
+    "GoogleNet": GoogleNet.ModelImplement,
+    "DenseNet": DenseNet.ModelImplement,
+    "Transformer": Transformer.ModelImplement
+}
 
-if modelConfig["vgg16"]["traning"] and vgg16Implement:
-    vgg16Implement.setup(
-        modelConfig["vgg16"]["datasetsDir"],
-        modelConfig["vgg16"]["modelSavePath"]
-    )
-    vgg16Implement.startTraining(10, 50, 10)
+for modelName, modelImplement in models.items():
+    thisModelConfig = modelConfig[modelName]
+    model: Interface.ModelInterface = modelImplement(
+        input_shape=(224,224,3)
+    ) if thisModelConfig["enable"] else None
 
-if modelConfig["googleNet"]["traning"] and googleNetImplement:
-    googleNetImplement.setup(
-        modelConfig["googleNet"]["datasetsDir"],
-        modelConfig["googleNet"]["modelSavePath"],
-    )
-    googleNetImplement.startTraining()
+    if modelConfig[modelName]["traning"] and model:
+        model.setup(
+            thisModelConfig["datasetsDir"],
+            thisModelConfig["modelSavePath"]
+        )
+        model.startTraining(10, 50, 10)
 
-if modelConfig["transformer"]["traning"] and transformerImplement:
-    transformerImplement.setup(
-        modelConfig["transformer"]["datasetsDir"],
-        modelConfig["transformer"]["modelSavePath"],
-    )
-    transformerImplement.startTraining()
+    if model:
+        model.evaluate()
+        model.gradCam()
 
-if modelConfig["denseNet"]["traning"] and denseNetImplement:
-    denseNetImplement.setup(
-        modelConfig["denseNet"]["datasetsDir"],
-        modelConfig["denseNet"]["modelSavePath"],
-    )
-    denseNetImplement.startTraining(10, 50, 10)
-
-# 使用評估指標評比以上模型
-vgg16Implement.evaluate()
-googleNetImplement.evaluate()
-transformerImplement.evaluate()
-denseNetImplement.evaluate()
-
-# 顯示熱力圖
-vgg16Implement.gradCam()
-googleNetImplement.gradCam()
-transformerImplement.gradCam()
-denseNetImplement.gradCam()
