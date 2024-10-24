@@ -20,14 +20,14 @@ models: dict[str, Interface.ModelInterface] = {
 
 for modelName, modelImplement in models.items():
     thisModelConfig = modelConfig[modelName]
-    model: Interface.ModelInterface = modelImplement(
-        input_shape=(224,224,3)
-    ) if thisModelConfig["enable"] else None
+    model: Interface.ModelInterface = modelImplement() if thisModelConfig["enable"] else None
 
     if modelConfig[modelName]["traning"] and model:
         model.setup(
             thisModelConfig["datasetsDir"],
-            thisModelConfig["modelSavePath"]
+            thisModelConfig["modelSavePath"],
+            (224,224,3),
+            (224,224,3)
         )
         model.startTraining(10, 50, 10)
 

@@ -6,13 +6,19 @@ class ModelInterface(ABC):
     def setup(
         self,
         datasetsDir: str,
-        modelSavePath: str
+        modelSavePath: str,
+        imageSize: tuple[int, int, int],
+        inputShape: tuple[int, int, int],
     ) -> None:
         """
             初始化設定
             datasetsDir: 資料集位置
             modelSavePath: 模型儲存位置
         """
+        pass
+
+    @abstractmethod
+    def createModel(self) -> Sequential:
         pass
 
     @abstractmethod

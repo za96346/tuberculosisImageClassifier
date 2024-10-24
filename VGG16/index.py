@@ -6,10 +6,9 @@ import keras_cv
 
 
 class ModelImplement(BaseModel):
-    def __init__(self, input_shape):
-        super().__init__(input_shape)
-        self.model = Sequential([
-            Conv2D(64, (3, 3), input_shape=input_shape, padding='same',
+    def createModel(self) -> Sequential:
+        model = Sequential([
+            Conv2D(64, (3, 3), input_shape=self.inputShape, padding='same',
                 activation='relu'),
             Conv2D(64, (3, 3), activation='relu', padding='same'),
             MaxPooling2D(pool_size=(2, 2), strides=(2, 2)),
@@ -35,7 +34,7 @@ class ModelImplement(BaseModel):
         ])
 
         # 編譯模型時確保 metrics 使用正確的參數
-        self.model.compile(
+        model.compile(
             optimizer='adam',
             loss=keras_cv.losses.FocalLoss(from_logits=False),  # 如果你的輸出是概率
             metrics=[
@@ -51,5 +50,7 @@ class ModelImplement(BaseModel):
         )
 
 
-        self.model.summary()
+        model.summary()
         
+        return model
+

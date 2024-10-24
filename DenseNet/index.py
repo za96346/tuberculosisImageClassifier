@@ -7,18 +7,17 @@ import keras_cv
 
 
 class ModelImplement(BaseModel):
-    def __init__(self, input_shape):
-        super().__init__(input_shape)
+    def createModel(self) -> Sequential:
         # 使用 include_top=False 来去除预训练模型的顶层
         base_model = DenseNet121(
             include_top=False,  # 去掉顶层
             weights="imagenet",
-            input_shape=input_shape,
+            input_shape=self.inputShape,
             pooling=None,
         )
         
         # 添加自定义的顶层用于二元分类
-        self.model = Sequential([
+        model = Sequential([
             base_model,
             GlobalAveragePooling2D(),  # Global pooling层替代Flatten，减少参数数量
             Dense(512, activation='relu'),
@@ -27,7 +26,7 @@ class ModelImplement(BaseModel):
         ])
 
         # 编译模型时确保 metrics 使用正确的参数
-        self.model.compile(
+        model.compile(
             optimizer='adam',
             loss=keras_cv.losses.FocalLoss(from_logits=False),  # 如果你的输出是概率
             metrics=[
@@ -38,5 +37,7 @@ class ModelImplement(BaseModel):
             ]
         )
 
-        self.model.summary()
+        model.summary()
+
+        return model
 

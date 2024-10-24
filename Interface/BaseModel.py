@@ -1,3 +1,4 @@
+import json
 import os
 import cv2
 import numpy as np
@@ -18,8 +19,7 @@ class BaseModel(ModelInterface):
     normalImageList: list[cv2.typing.MatLike]  # 正常影像matLike list
     tuberculosisImageList: list[cv2.typing.MatLike]  # 肺結核影像matLike list
 
-    def __init__(self, imageSize):
-        self.imageSize = imageSize
+    def __init__(self):
         self.__useGPU__()
         super().__init__()
 
@@ -37,9 +37,11 @@ class BaseModel(ModelInterface):
             except RuntimeError as e:
                 print(e)
 
-    def setup(self, datasetsDir, modelSavePath):
+    def setup(self, datasetsDir, modelSavePath, imageSize, inputShape):
         self.datasetsDir = datasetsDir
         self.modelSavePath = modelSavePath
+        self.imageSize = imageSize
+        self.inputShape = inputShape
 
     def loadModel(self):
         pass
@@ -86,6 +88,7 @@ class BaseModel(ModelInterface):
         kf = KFold(n_splits=num_folds, shuffle=True)
 
         fold_no = 1
+        allHistory = []
         for train_index, val_index in kf.split(filepaths):
             print(f'正在訓練第 {fold_no} 折...')
 
@@ -99,8 +102,10 @@ class BaseModel(ModelInterface):
             
             steps_per_epoch = len(X_train) // batch_size
             validation_steps = len(X_val) // batch_size
-            
-            self.model.fit(
+
+            model = self.createModel()
+
+            history = model.fit(
                 train_generator,
                 steps_per_epoch=steps_per_epoch,
                 epochs=epochs,
@@ -108,11 +113,17 @@ class BaseModel(ModelInterface):
                 validation_steps=validation_steps,
             )
 
+            allHistory.append({
+                [fold_no]: history.history
+            })
+
             # 每次訓練完成後可選擇保存模型
-            self.model.save(f'{self.modelSavePath}/model_fold_{fold_no}.h5')
+            model.save(f'{self.modelSavePath}/model_fold_{fold_no}.h5')
 
             print(f'第 {fold_no} 折完成')
             fold_no += 1
+        with open(f'{self.modelSavePath}/training_history.json', 'w') as json_file:
+            json.dump(allHistory, json_file, indent=4)
 
     def predict(self, imagePath: str):
         pass
