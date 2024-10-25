@@ -34,7 +34,9 @@ for modelName, modelImplement in models.items():
         if modelConfig[modelName]["traning"] and model:
             model.startTraining(10, 50, 10)
 
+        if modelConfig[modelName]["plotTrainingHistory"]:
+            model.plotTrainingHistory()
+
         model.evaluate()
         model.gradCam()
-        model.plotTrainingHistory()
 
