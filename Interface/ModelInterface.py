@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from keras.api.models import Sequential
 
+
 class ModelInterface(ABC):
     @abstractmethod
     def setup(

@@ -9,7 +9,7 @@ class ModelImplement(BaseModel):
     def createModel(self) -> Sequential:
         model = Sequential([
             Conv2D(64, (3, 3), input_shape=self.inputShape, padding='same',
-                activation='relu'),
+                   activation='relu'),
             Conv2D(64, (3, 3), activation='relu', padding='same'),
             MaxPooling2D(pool_size=(2, 2), strides=(2, 2)),
             Conv2D(128, (3, 3), activation='relu', padding='same'),
@@ -49,8 +49,6 @@ class ModelImplement(BaseModel):
             ]
         )
 
-
         model.summary()
-        
-        return model
 
+        return model

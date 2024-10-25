@@ -48,8 +48,8 @@ class BaseModel(ModelInterface):
 
     # 自定義生成器來根據路徑讀取圖片
     def imageDataGenerator(self, filepaths, labels, batch_size):
-        datagen = ImageDataGenerator(rescale=1./255)
-        
+        datagen = ImageDataGenerator(rescale=1. / 255)
+
         while True:
             indices = np.arange(len(filepaths))
             np.random.shuffle(indices)  # 打亂順序
@@ -60,25 +60,31 @@ class BaseModel(ModelInterface):
                 end = min(start + batch_size, len(filepaths))
                 batch_paths = filepaths[start:end]
                 batch_labels = labels[start:end]
-                
+
                 images = []
                 for path in batch_paths:
                     img = load_img(path, target_size=self.imageSize)
                     img = img_to_array(img)
                     images.append(img)
-                
+
                 images = np.array(images, dtype="float32")
-                batch_labels = np.array(batch_labels, dtype="float32").reshape(-1, 1)
+                batch_labels = np.array(
+                    batch_labels, dtype="float32").reshape(-1, 1)
                 yield images, batch_labels
 
     def startTraining(self, num_folds, epochs, batch_size):
         # 讀取所有圖片路徑和標籤
         normal_images = glob(os.path.join(self.datasetsDir, 'Normal', '*.png'))
-        tb_images = glob(os.path.join(self.datasetsDir, 'Tuberculosis', '*.png'))
+        tb_images = glob(
+            os.path.join(
+                self.datasetsDir,
+                'Tuberculosis',
+                '*.png'))
 
         # 建立資料和標籤
         filepaths = normal_images + tb_images
-        labels = [0] * len(normal_images) + [1] * len(tb_images)  # 0: Normal, 1: Tuberculosis
+        labels = [0] * len(normal_images) + [1] * \
+            len(tb_images)  # 0: Normal, 1: Tuberculosis
 
         # 將資料轉換為numpy array以便KFold使用
         filepaths = np.array(filepaths)
@@ -95,11 +101,12 @@ class BaseModel(ModelInterface):
             # 分割訓練集與驗證集
             X_train, X_val = filepaths[train_index], filepaths[val_index]
             y_train, y_val = labels[train_index], labels[val_index]
-            
+
             # 訓練模型
-            train_generator = self.imageDataGenerator(X_train, y_train, batch_size)
+            train_generator = self.imageDataGenerator(
+                X_train, y_train, batch_size)
             val_generator = self.imageDataGenerator(X_val, y_val, batch_size)
-            
+
             steps_per_epoch = len(X_train) // batch_size
             validation_steps = len(X_val) // batch_size
 

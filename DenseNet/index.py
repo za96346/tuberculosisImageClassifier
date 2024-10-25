@@ -15,7 +15,7 @@ class ModelImplement(BaseModel):
             input_shape=self.inputShape,
             pooling=None,
         )
-        
+
         # 添加自定义的顶层用于二元分类
         model = Sequential([
             base_model,
@@ -30,7 +30,8 @@ class ModelImplement(BaseModel):
             optimizer='adam',
             loss=keras_cv.losses.FocalLoss(from_logits=False),  # 如果你的输出是概率
             metrics=[
-                AUC(num_thresholds=200, curve="ROC", summation_method="interpolation"),
+                AUC(num_thresholds=200, curve="ROC",
+                    summation_method="interpolation"),
                 Accuracy(),
                 F1Score(average='micro'),  # 二元分类
                 PrecisionAtRecall(0.5, num_thresholds=200)  # 设置适当的 threshold
@@ -40,4 +41,3 @@ class ModelImplement(BaseModel):
         model.summary()
 
         return model
-
