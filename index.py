@@ -23,15 +23,18 @@ for modelName, modelImplement in models.items():
     model: Interface.ModelInterface = modelImplement(
     ) if thisModelConfig["enable"] else None
 
-    if modelConfig[modelName]["traning"] and model:
+    if model:
         model.setup(
             thisModelConfig["datasetsDir"],
             thisModelConfig["modelSavePath"],
             (224, 224, 3),
             (224, 224, 3)
         )
-        model.startTraining(10, 50, 10)
 
-    if model:
+        if modelConfig[modelName]["traning"] and model:
+            model.startTraining(10, 50, 10)
+
         model.evaluate()
         model.gradCam()
+        model.plotTrainingHistory()
+

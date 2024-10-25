@@ -58,3 +58,10 @@ class ModelInterface(ABC):
             顯示熱力圖
         """
         pass
+
+    @abstractmethod
+    def plotTrainingHistory(self) -> None:
+        """
+            畫出訓練過程的數指標圖
+        """
+        pass

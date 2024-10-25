@@ -8,6 +8,7 @@ from .ModelInterface import ModelInterface
 import tensorflow as tf
 from sklearn.model_selection import KFold
 from keras.api.models import Sequential
+import matplotlib.pyplot as plt
 from keras._tf_keras.keras.preprocessing.image import ImageDataGenerator, load_img, img_to_array
 
 
@@ -131,6 +132,46 @@ class BaseModel(ModelInterface):
             fold_no += 1
         with open(f'{self.modelSavePath}/training_history.json', 'w') as json_file:
             json.dump(allHistory, json_file, indent=4)
+
+    def plotTrainingHistory(self):
+
+        # Load the JSON file data
+        file_path = f"{self.modelSavePath}/training_history.json"
+        with open(file_path, 'r') as f:
+            data = json.load(f)
+
+        # Prepare data for plotting (epoch 50, kfold k=10)
+        epochs = list(range(1, 51))  # 50 epochs
+        accuracy = data[0]['1']['accuracy'][:50]
+        auc = data[0]['1']['auc'][:50]
+        f1_score = data[0]['1']['f1_score'][:50]
+        loss = data[0]['1']['loss'][:50]
+        val_accuracy = data[0]['1']['val_accuracy'][:50]
+        val_auc = data[0]['1']['val_auc'][:50]
+        val_f1_score = data[0]['1']['val_f1_score'][:50]
+        val_loss = data[0]['1']['val_loss'][:50]
+
+        # Create the plot
+        plt.figure(figsize=(10, 8))
+
+        plt.plot(epochs, accuracy, label="Accuracy")
+        plt.plot(epochs, auc, label="AUC")
+        plt.plot(epochs, f1_score, label="F1 Score")
+        plt.plot(epochs, loss, label="Loss")
+        plt.plot(epochs, val_accuracy, label="Val Accuracy", linestyle='--')
+        plt.plot(epochs, val_auc, label="Val AUC", linestyle='--')
+        plt.plot(epochs, val_f1_score, label="Val F1 Score", linestyle='--')
+        plt.plot(epochs, val_loss, label="Val Loss", linestyle='--')
+
+        plt.title("Training and Validation Metrics Over 50 Epochs (K=10)")
+        plt.xlabel("Epoch")
+        plt.ylabel("Metrics")
+        plt.legend()
+        plt.grid(True)
+
+        # Show the plot
+        plt.show()
+
 
     def predict(self, imagePath: str):
         pass
