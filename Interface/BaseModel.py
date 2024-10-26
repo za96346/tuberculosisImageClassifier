@@ -95,7 +95,7 @@ class BaseModel(ModelInterface):
         kf = KFold(n_splits=num_folds, shuffle=True)
 
         fold_no = 1
-        allHistory = []
+        allHistory = {}
         for train_index, val_index in kf.split(filepaths):
             print(f'正在訓練第 {fold_no} 折...')
 
@@ -121,9 +121,7 @@ class BaseModel(ModelInterface):
                 validation_steps=validation_steps,
             )
 
-            allHistory.append({
-                fold_no: history.history
-            })
+            allHistory[fold_no] = history.history
 
             # 每次訓練完成後可選擇保存模型
             model.save(f'{self.modelSavePath}/model_fold_{fold_no}.h5')
