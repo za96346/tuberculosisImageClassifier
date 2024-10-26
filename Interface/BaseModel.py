@@ -132,42 +132,33 @@ class BaseModel(ModelInterface):
             json.dump(allHistory, json_file, indent=4)
 
     def plotTrainingHistory(self):
-
         # Load the JSON file data
         file_path = f"{self.modelSavePath}/training_history.json"
         with open(file_path, 'r') as f:
             data = json.load(f)
 
-        # Prepare data for plotting (epoch 50, kfold k=10)
-        epochs = list(range(1, 51))  # 50 epochs
-        accuracy = data[0]['1']['accuracy'][:50]
-        auc = data[0]['1']['auc'][:50]
-        f1_score = data[0]['1']['f1_score'][:50]
-        loss = data[0]['1']['loss'][:50]
-        val_accuracy = data[0]['1']['val_accuracy'][:50]
-        val_auc = data[0]['1']['val_auc'][:50]
-        val_f1_score = data[0]['1']['val_f1_score'][:50]
-        val_loss = data[0]['1']['val_loss'][:50]
+        # Define the metrics to plot
+        metrics = ["accuracy", "auc", "f1_score", "loss", "precision_at_recall", "val_accuracy", "val_auc", "val_f1_score", "val_loss", "val_precision_at_recall"]
 
-        # Create the plot
-        plt.figure(figsize=(10, 8))
+        # Set up the plot
+        num_k = len(data)
+        fig, axes = plt.subplots(len(metrics), num_k, figsize=(5 * num_k, 4 * len(metrics)))
+        fig.subplots_adjust(hspace=0.5, wspace=0.4)
+        fig.suptitle("Training Metrics for Each K-fold", fontsize=16, y=1.02)
 
-        plt.plot(epochs, accuracy, label="Accuracy")
-        plt.plot(epochs, auc, label="AUC")
-        plt.plot(epochs, f1_score, label="F1 Score")
-        plt.plot(epochs, loss, label="Loss")
-        plt.plot(epochs, val_accuracy, label="Val Accuracy", linestyle='--')
-        plt.plot(epochs, val_auc, label="Val AUC", linestyle='--')
-        plt.plot(epochs, val_f1_score, label="Val F1 Score", linestyle='--')
-        plt.plot(epochs, val_loss, label="Val Loss", linestyle='--')
+        # Iterate over each k-fold and metric
+        for k_index, (k, values) in enumerate(data.items()):
+            for m_index, metric in enumerate(metrics):
+                ax = axes[m_index, k_index]
+                if metric in values:
+                    ax.plot(values[metric])
+                    ax.set_title(f"K={k} - {metric}")
+                    ax.set_xlabel("Epoch")
+                    ax.set_ylabel(metric.capitalize())
+                else:
+                    ax.axis('off')  # Turn off axis if the metric is missing for a specific k-fold
 
-        plt.title("Training and Validation Metrics Over 50 Epochs (K=10)")
-        plt.xlabel("Epoch")
-        plt.ylabel("Metrics")
-        plt.legend()
-        plt.grid(True)
-
-        # Show the plot
+        plt.tight_layout()
         plt.show()
 
 
