@@ -120,6 +120,7 @@ class BaseModel(ModelInterface):
                 epochs=epochs,
                 validation_data=val_generator,
                 validation_steps=validation_steps,
+                batch_size=batch_size
             )
 
             allHistory[fold_no] = history.history
