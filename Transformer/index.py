@@ -11,12 +11,12 @@ import tensorflow as tf
 import keras_cv
 
 class Patches(Layer):
-    def __init__(self, patch_size):
+    def __init__(self, patch_size, batch_size):
         super().__init__()
         self.patch_size = patch_size
+        self.batch_size = batch_size
 
     def call(self, images):
-        batch_size = tf.shape(images)[0]
         patches = tf.image.extract_patches(
             images=images,
             sizes=[1, self.patch_size, self.patch_size, 1],
@@ -25,7 +25,7 @@ class Patches(Layer):
             padding='VALID'
         )
         patch_dims = patches.shape[-1]
-        patches = tf.reshape(patches, (batch_size, -1, patch_dims))
+        patches = tf.reshape(patches, (self.batch_size, -1, patch_dims))
         return patches
 
     def get_config(self):
@@ -79,7 +79,7 @@ class ModelImplement(BaseModel):
         augmented = self.dataAugmentation()(inputs)
         
         # 创建补丁
-        patches = Patches(self.patch_size)(augmented)
+        patches = Patches(self.patch_size, self.batch_size)(augmented)
         
         # 编码补丁
         encoded_patches = PatchEncoder(self.num_patches, self.projection_dim)(patches)
@@ -110,7 +110,7 @@ class ModelImplement(BaseModel):
         features = self.mlp(representation, hidden_units=self.mlp_head_units, dropout_rate=0.5)
         
         # 分类输出
-        logits = Dense(num_classes, activation='softmax')(features)
+        logits = Dense(num_classes, activation='sigmoid')(features)
         
         # 创建 Keras 模型
         model = Model(inputs=inputs, outputs=logits)
@@ -158,10 +158,3 @@ class ModelImplement(BaseModel):
         # 提取图像数据并进行适配
         images = dataset.map(lambda x, y: x)
         normalization_layer.adapt(images)
-
-# 示例用法：
-# 假设您有一个名为 `train_dataset` 的 tf.data.Dataset 对象
-# model_implement = ModelImplement()
-# model = model_implement.createModel()
-# model_implement.adaptNormalization(train_dataset)
-# model.fit(train_dataset, epochs=model_implement.num_epochs, batch_size=model_implement.batch_size)

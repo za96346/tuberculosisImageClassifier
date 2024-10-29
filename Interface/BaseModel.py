@@ -74,6 +74,7 @@ class BaseModel(ModelInterface):
                 yield images, batch_labels
 
     def startTraining(self, num_folds, epochs, batch_size):
+        self.batch_size = batch_size
         # 讀取所有圖片路徑和標籤
         normal_images = glob(os.path.join(self.datasetsDir, 'Normal', '*.png'))
         tb_images = glob(
