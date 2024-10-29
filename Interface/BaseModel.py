@@ -132,34 +132,35 @@ class BaseModel(ModelInterface):
             json.dump(allHistory, json_file, indent=4)
 
     def plotTrainingHistory(self):
-        # Load the JSON file data
+        # Define file paths
         file_path = f"{self.modelSavePath}/training_history.json"
+        output_folder = f"{self.modelSavePath}/plots"
+        os.makedirs(output_folder, exist_ok=True)
+
+        # Load the JSON data
         with open(file_path, 'r') as f:
             data = json.load(f)
 
         # Define the metrics to plot
         metrics = ["accuracy", "auc", "f1_score", "loss", "precision_at_recall", "val_accuracy", "val_auc", "val_f1_score", "val_loss", "val_precision_at_recall"]
 
-        # Set up the plot
-        num_k = len(data)
-        fig, axes = plt.subplots(len(metrics), num_k, figsize=(5 * num_k, 4 * len(metrics)))
-        fig.subplots_adjust(hspace=0.5, wspace=0.4)
-        fig.suptitle("Training Metrics for Each K-fold", fontsize=16, y=1.02)
-
-        # Iterate over each k-fold and metric
-        for k_index, (k, values) in enumerate(data.items()):
-            for m_index, metric in enumerate(metrics):
-                ax = axes[m_index, k_index]
+        # Iterate over each metric and save each as an individual image
+        for metric in metrics:
+            plt.figure(figsize=(10, 6))
+            for k, values in data.items():
                 if metric in values:
-                    ax.plot(values[metric])
-                    ax.set_title(f"K={k} - {metric}")
-                    ax.set_xlabel("Epoch")
-                    ax.set_ylabel(metric.capitalize())
-                else:
-                    ax.axis('off')  # Turn off axis if the metric is missing for a specific k-fold
+                    plt.plot(values[metric], label=f'K={k}')
+            plt.title(f"Training Metric: {metric}")
+            plt.xlabel("Epoch")
+            plt.ylabel(metric.capitalize())
+            plt.legend()
+            
+            # Save each metric plot as a separate image
+            output_path = os.path.join(output_folder, f"{metric}_by_kfold.png")
+            plt.savefig(output_path)
+            plt.close()
 
-        plt.tight_layout()
-        plt.show()
+        print(f"All plots have been saved to {output_folder}")
 
 
     def predict(self, imagePath: str):
