@@ -7,8 +7,11 @@ from keras.api.metrics import AUC, Accuracy, F1Score, PrecisionAtRecall
 from keras.api.models import Model, Sequential
 from keras.api.activations import gelu
 from keras import backend as K
+from tensorflow.keras import mixed_precision
 import tensorflow as tf
 import keras_cv
+
+mixed_precision.set_global_policy('mixed_float16')
 
 class Patches(Layer):
     def __init__(self, patch_size, batch_size):
