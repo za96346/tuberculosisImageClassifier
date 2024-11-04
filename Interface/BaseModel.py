@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 from glob import glob
 from tqdm import tqdm
+import gc
 from .ModelInterface import ModelInterface
 import tensorflow as tf
 from sklearn.model_selection import KFold
@@ -130,6 +131,14 @@ class BaseModel(ModelInterface):
 
             print(f'第 {fold_no} 折完成')
             fold_no += 1
+
+            # 清除 gpu 佔用
+            tf.keras.backend.clear_session()
+            gc.collect()
+            del model, X_train, X_val, y_train, y_val, val_generator
+            print(tf.config.experimental.get_memory_info('GPU:0'))
+
+
         with open(f'{self.modelSavePath}/training_history.json', 'w') as json_file:
             json.dump(allHistory, json_file, indent=4)
 
