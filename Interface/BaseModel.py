@@ -135,7 +135,7 @@ class BaseModel(ModelInterface):
             # 清除 gpu 佔用
             tf.keras.backend.clear_session()
             gc.collect()
-            del model, X_train, X_val, y_train, y_val, val_generator
+            # del model, X_train, X_val, y_train, y_val, val_generator
             print(tf.config.experimental.get_memory_info('GPU:0'))
 
 
