@@ -1,9 +1,6 @@
 from Interface import BaseModel
 from keras.api.models import Sequential
-from keras.api.optimizers import Adam
-from keras.api.metrics import AUC, Accuracy, F1Score, PrecisionAtRecall
-from keras.api.layers import Dense, Activation, Dropout, Flatten, Conv2D, MaxPooling2D
-import keras_cv
+from keras.api.layers import Dense, Flatten, Conv2D, MaxPooling2D
 
 
 class ModelImplement(BaseModel):
@@ -33,23 +30,5 @@ class ModelImplement(BaseModel):
             Dense(4096, activation='relu'),
             Dense(2, activation='softmax')
         ])
-
-        # 編譯模型時確保 metrics 使用正確的參數
-        model.compile(
-            optimizer=Adam(learning_rate=self.learning_rate),
-            loss=keras_cv.losses.FocalLoss(from_logits=False),  # 如果你的輸出是概率
-            metrics=[
-                AUC(
-                    num_thresholds=200,
-                    curve="ROC",
-                    summation_method="interpolation",
-                ),
-                Accuracy(),
-                F1Score(average='micro'),  # 適合二元分類
-                PrecisionAtRecall(0.5, num_thresholds=200)  # 設定適當的 threshold
-            ]
-        )
-
-        model.summary()
 
         return model

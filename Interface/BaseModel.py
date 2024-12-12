@@ -9,6 +9,9 @@ import tensorflow as tf
 from sklearn.model_selection import KFold
 from keras.api.models import Sequential
 import matplotlib.pyplot as plt
+from keras.api.optimizers import Adam
+from keras.api.metrics import AUC, Accuracy, F1Score, PrecisionAtRecall
+import keras_cv
 from keras._tf_keras.keras.preprocessing.image import ImageDataGenerator
 
 
@@ -50,7 +53,6 @@ class BaseModel(ModelInterface):
 
     def startTraining(self, num_folds, epochs, batch_size, learning_rate):
         self.batch_size = batch_size
-        self.learning_rate = learning_rate
 
         # 使用 ImageDataGenerator 預處理影像
         datagen = ImageDataGenerator(
@@ -94,6 +96,21 @@ class BaseModel(ModelInterface):
             y_train, y_val = y_data[train_index], y_data[val_index]
 
             model = self.createModel()
+
+            # 编译模型时确保 metrics 使用正确的参数
+            model.compile(
+                optimizer=Adam(learning_rate=learning_rate),
+                loss=keras_cv.losses.FocalLoss(from_logits=False),  # 如果你的输出是概率
+                metrics=[
+                    AUC(num_thresholds=200, curve="ROC",
+                        summation_method="interpolation"),
+                    Accuracy(),
+                    F1Score(average='micro'),
+                    PrecisionAtRecall(0.5, num_thresholds=200)  # 设置适当的 threshold
+                ]
+            )
+
+            model.summary()
 
             history = model.fit(
                 X_train,

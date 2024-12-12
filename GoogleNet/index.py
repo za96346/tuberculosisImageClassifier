@@ -1,11 +1,7 @@
 from Interface import BaseModel
 from keras.api.applications import InceptionV3
 from keras.api.models import Sequential
-from keras.api.optimizers import Adam
-from keras.api.metrics import AUC, Accuracy, F1Score, PrecisionAtRecall
-from keras.api.layers import Dense, Activation, Dropout, Flatten, GlobalAveragePooling2D
-import keras_cv
-
+from keras.api.layers import Dense, Dropout, GlobalAveragePooling2D
 
 class ModelImplement(BaseModel):
     def createModel(self) -> Sequential:
@@ -23,20 +19,5 @@ class ModelImplement(BaseModel):
             Dropout(0.5),
             Dense(2, activation='softmax')
         ])
-
-        # 编译模型时确保 metrics 使用正确的参数
-        model.compile(
-            optimizer=Adam(learning_rate=self.learning_rate),
-            loss=keras_cv.losses.FocalLoss(from_logits=False),  # 如果你的输出是概率
-            metrics=[
-                AUC(num_thresholds=200, curve="ROC",
-                    summation_method="interpolation"),
-                Accuracy(),
-                F1Score(average='micro'),
-                PrecisionAtRecall(0.5, num_thresholds=200)  # 设置适当的 threshold
-            ]
-        )
-
-        model.summary()
 
         return model

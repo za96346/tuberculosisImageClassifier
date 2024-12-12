@@ -1,16 +1,13 @@
 from Interface import BaseModel
 from keras.api.layers import (
-    Dense, Dropout, Activation, Layer, Embedding, Input, LayerNormalization,
+    Dense, Dropout, Layer, Embedding, Input, LayerNormalization,
     MultiHeadAttention, Add, Flatten, Resizing, RandomFlip, RandomRotation, RandomZoom
 )
-from keras.api.metrics import AUC, Accuracy, F1Score, PrecisionAtRecall
 from keras.api.models import Model, Sequential
 from keras.api.activations import gelu
-from keras.api.optimizers import Adam
 from keras import backend as K
 from tensorflow.keras import mixed_precision
 import tensorflow as tf
-import keras_cv
 
 mixed_precision.set_global_policy('mixed_float16')
 
@@ -118,22 +115,7 @@ class ModelImplement(BaseModel):
         
         # 创建 Keras 模型
         model = Model(inputs=inputs, outputs=logits)
-        
-        # 编译模型
-        model.compile(
-            optimizer=Adam(learning_rate=self.learning_rate),
-            loss=keras_cv.losses.FocalLoss(from_logits=False),  # 如果你的输出是概率
-            metrics=[
-                AUC(num_thresholds=200, curve="ROC",
-                    summation_method="interpolation"),
-                Accuracy(),
-                F1Score(average='micro'),  # 二元分类
-                PrecisionAtRecall(0.5, num_thresholds=200)  # 设置适当的 threshold
-            ]
-        )
 
-        model.summary()
-        
         return model
 
     def mlp(self, x, hidden_units, dropout_rate):
