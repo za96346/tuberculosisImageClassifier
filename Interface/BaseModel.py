@@ -100,7 +100,7 @@ class BaseModel(ModelInterface):
             # 编译模型时确保 metrics 使用正确的参数
             model.compile(
                 optimizer=Adam(learning_rate=learning_rate),
-                # loss=keras_cv.losses.FocalLoss(gamma=2., alpha=0.25),  # 如果你的输出是概率
+                loss=keras_cv.losses.FocalLoss(gamma=2., alpha=0.25),  # 如果你的输出是概率
                 metrics=[
                     AUC(num_thresholds=200, curve="ROC",
                         summation_method="interpolation"),
