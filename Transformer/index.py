@@ -6,6 +6,7 @@ from keras.api.layers import (
 from keras.api.metrics import AUC, Accuracy, F1Score, PrecisionAtRecall
 from keras.api.models import Model, Sequential
 from keras.api.activations import gelu
+from keras.api.optimizers import Adam
 from keras import backend as K
 from tensorflow.keras import mixed_precision
 import tensorflow as tf
@@ -120,7 +121,7 @@ class ModelImplement(BaseModel):
         
         # 编译模型
         model.compile(
-            optimizer='adam',
+            optimizer=Adam(learning_rate=0.0001),
             loss=keras_cv.losses.FocalLoss(from_logits=False),  # 如果你的输出是概率
             metrics=[
                 AUC(num_thresholds=200, curve="ROC",

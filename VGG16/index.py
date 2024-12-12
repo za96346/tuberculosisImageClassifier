@@ -1,5 +1,6 @@
 from Interface import BaseModel
 from keras.api.models import Sequential
+from keras.api.optimizers import Adam
 from keras.api.metrics import AUC, Accuracy, F1Score, PrecisionAtRecall
 from keras.api.layers import Dense, Activation, Dropout, Flatten, Conv2D, MaxPooling2D
 import keras_cv
@@ -35,7 +36,7 @@ class ModelImplement(BaseModel):
 
         # 編譯模型時確保 metrics 使用正確的參數
         model.compile(
-            optimizer='adam',
+            optimizer=Adam(learning_rate=0.0001),
             loss=keras_cv.losses.FocalLoss(from_logits=False),  # 如果你的輸出是概率
             metrics=[
                 AUC(

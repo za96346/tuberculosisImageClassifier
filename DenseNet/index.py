@@ -1,6 +1,7 @@
 from Interface import BaseModel
 from keras.api.applications import DenseNet121
 from keras.api.models import Sequential
+from keras.api.optimizers import Adam
 from keras.api.metrics import AUC, Accuracy, F1Score, PrecisionAtRecall
 from keras.api.layers import Dense, Activation, Dropout, Flatten, GlobalAveragePooling2D
 import keras_cv
@@ -27,7 +28,7 @@ class ModelImplement(BaseModel):
 
         # 编译模型时确保 metrics 使用正确的参数
         model.compile(
-            optimizer='adam',
+            optimizer=Adam(learning_rate=0.0001),
             loss=keras_cv.losses.FocalLoss(from_logits=False),  # 如果你的输出是概率
             metrics=[
                 AUC(num_thresholds=200, curve="ROC",
