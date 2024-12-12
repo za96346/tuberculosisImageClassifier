@@ -76,7 +76,7 @@ class ModelImplement(BaseModel):
             1024,
         ]
 
-        num_classes = 1
+        num_classes = 2
         inputs = Input(shape=self.imageSize)
         
         # 数据增强
@@ -114,7 +114,7 @@ class ModelImplement(BaseModel):
         features = self.mlp(representation, hidden_units=self.mlp_head_units, dropout_rate=0.5)
         
         # 分类输出
-        logits = Dense(num_classes, activation='sigmoid')(features)
+        logits = Dense(num_classes, activation='softmax')(features)
         
         # 创建 Keras 模型
         model = Model(inputs=inputs, outputs=logits)

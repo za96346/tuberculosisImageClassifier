@@ -21,7 +21,7 @@ class ModelImplement(BaseModel):
             GlobalAveragePooling2D(),  # Global pooling层替代Flatten，减少参数数量
             Dense(1024, activation='relu'),
             Dropout(0.5),
-            Dense(1, activation='sigmoid')  # 二元分类的输出
+            Dense(2, activation='softmax')
         ])
 
         # 编译模型时确保 metrics 使用正确的参数
@@ -32,7 +32,7 @@ class ModelImplement(BaseModel):
                 AUC(num_thresholds=200, curve="ROC",
                     summation_method="interpolation"),
                 Accuracy(),
-                F1Score(average='micro'),  # 二元分类
+                F1Score(average='micro'),
                 PrecisionAtRecall(0.5, num_thresholds=200)  # 设置适当的 threshold
             ]
         )

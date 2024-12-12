@@ -23,7 +23,7 @@ class ModelImplement(BaseModel):
             GlobalAveragePooling2D(),  # Global pooling层替代Flatten，减少参数数量
             Dense(512, activation='relu'),
             Dropout(0.5),
-            Dense(1, activation='sigmoid')  # 二元分类的输出
+            Dense(2, activation='softmax')  # 二元分类的输出
         ])
 
         # 编译模型时确保 metrics 使用正确的参数

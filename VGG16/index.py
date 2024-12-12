@@ -31,7 +31,7 @@ class ModelImplement(BaseModel):
             Flatten(),
             Dense(4096, activation='relu'),
             Dense(4096, activation='relu'),
-            Dense(1, activation='sigmoid')
+            Dense(2, activation='softmax')
         ])
 
         # 編譯模型時確保 metrics 使用正確的參數
