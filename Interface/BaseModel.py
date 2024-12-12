@@ -80,7 +80,7 @@ class BaseModel(ModelInterface):
         for i in range(len(train_generator)):
             x, y = train_generator[i]
             x_data.append(x)
-            y_data.append(np.array(y))
+            y_data.append(np.array([y]))
 
         x_data = np.concatenate(x_data, axis=0)
         y_data = np.concatenate(y_data, axis=0)
