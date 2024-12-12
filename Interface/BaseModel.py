@@ -65,7 +65,7 @@ class BaseModel(ModelInterface):
             self.datasetsDir,
             target_size=(self.imageSize[0], self.imageSize[1]),
             batch_size=batch_size,
-            class_mode='binary',
+            class_mode='categorical',
             subset='training',
             shuffle=True
         )
@@ -80,7 +80,7 @@ class BaseModel(ModelInterface):
         for i in range(len(train_generator)):
             x, y = train_generator[i]
             x_data.append(x)
-            y_data.append(np.array([y]))
+            y_data.append(y)
 
         x_data = np.concatenate(x_data, axis=0)
         y_data = np.concatenate(y_data, axis=0)
