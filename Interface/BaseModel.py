@@ -3,14 +3,13 @@ import os
 import cv2
 import numpy as np
 from glob import glob
-from tqdm import tqdm
 import gc
 from .ModelInterface import ModelInterface
 import tensorflow as tf
 from sklearn.model_selection import KFold
 from keras.api.models import Sequential
 import matplotlib.pyplot as plt
-from keras._tf_keras.keras.preprocessing.image import ImageDataGenerator, load_img, img_to_array
+from keras._tf_keras.keras.preprocessing.image import ImageDataGenerator
 
 
 class BaseModel(ModelInterface):
@@ -48,84 +47,65 @@ class BaseModel(ModelInterface):
     def loadModel(self):
         pass
 
-    # 自定義生成器來根據路徑讀取圖片
-    def imageDataGenerator(self, filepaths, labels, batch_size):
-        datagen = ImageDataGenerator(rescale=1. / 255)
-
-        while True:
-            indices = np.arange(len(filepaths))
-            np.random.shuffle(indices)  # 打亂順序
-            filepaths = filepaths[indices]
-            labels = labels[indices]
-
-            for start in range(0, len(filepaths), batch_size):
-                end = min(start + batch_size, len(filepaths))
-                batch_paths = filepaths[start:end]
-                batch_labels = labels[start:end]
-
-                images = []
-                for path in batch_paths:
-                    img = load_img(path, target_size=self.imageSize)
-                    img = img_to_array(img)
-                    images.append(img)
-
-                images = np.array(images, dtype="float32")
-                batch_labels = np.array(
-                    batch_labels, dtype="float32").reshape(-1, 1)
-                yield images, batch_labels
 
     def startTraining(self, num_folds, epochs, batch_size, learning_rate):
         self.batch_size = batch_size
         self.learning_rate = learning_rate
-        # 讀取所有圖片路徑和標籤
-        normal_images = glob(os.path.join(self.datasetsDir, 'Normal', '*.png'))
-        tb_images = glob(
-            os.path.join(
-                self.datasetsDir,
-                'Tuberculosis',
-                '*.png'))
 
-        # 建立資料和標籤
-        filepaths = normal_images + tb_images
-        labels = [0] * len(normal_images) + [1] * \
-            len(tb_images)  # 0: Normal, 1: Tuberculosis
+        # 使用 ImageDataGenerator 預處理影像
+        datagen = ImageDataGenerator(
+            rescale=1.0/255,  # 將像素值歸一化到 [0, 1]
+            validation_split=0.2  # 保留 20% 作為測試集
+        )
 
-        # 將資料轉換為numpy array以便KFold使用
-        filepaths = np.array(filepaths)
-        labels = np.array(labels)
+        # 建立數據生成器
+        train_generator = datagen.flow_from_directory(
+            self.datasetsDir,
+            target_size=(self.imageSize[0], self.imageSize[1]),
+            batch_size=batch_size,
+            class_mode='categorical',
+            subset='training',
+            shuffle=True
+        )
 
         # KFold 交叉驗證
         kf = KFold(n_splits=num_folds, shuffle=True)
 
+        # 將數據提取為 numpy 數組
+        x_data = []
+        y_data = []
+
+        for i in range(len(train_generator)):
+            x, y = train_generator[i]
+            x_data.append(x)
+            y_data.append(y)
+
+        x_data = np.concatenate(x_data, axis=0)
+        y_data = np.concatenate(y_data, axis=0)
+
         fold_no = 1
         allHistory = {}
-        for train_index, val_index in kf.split(filepaths):
+        scores = []
+        for train_index, val_index in kf.split(x_data):
             print(f'正在訓練第 {fold_no} 折...')
 
             # 分割訓練集與驗證集
-            X_train, X_val = filepaths[train_index], filepaths[val_index]
-            y_train, y_val = labels[train_index], labels[val_index]
-
-            # 訓練模型
-            train_generator = self.imageDataGenerator(
-                X_train, y_train, batch_size)
-            val_generator = self.imageDataGenerator(X_val, y_val, batch_size)
-
-            steps_per_epoch = len(X_train) // batch_size
-            validation_steps = len(X_val) // batch_size
+            X_train, X_val = x_data[train_index], x_data[val_index]
+            y_train, y_val = y_data[train_index], y_data[val_index]
 
             model = self.createModel()
 
             history = model.fit(
-                train_generator,
-                steps_per_epoch=steps_per_epoch,
+                X_train,
+                y_train,
+                validation_data=(X_val, y_val),
                 epochs=epochs,
-                validation_data=val_generator,
-                validation_steps=validation_steps,
                 batch_size=batch_size
             )
 
             allHistory[fold_no] = history.history
+
+            scores.append(model.evaluate(X_val, y_val, verbose=0))
 
             # 每次訓練完成後可選擇保存模型
             model.save(f'{self.modelSavePath}/model_fold_{fold_no}.h5')
@@ -142,6 +122,8 @@ class BaseModel(ModelInterface):
 
         with open(f'{self.modelSavePath}/training_history.json', 'w') as json_file:
             json.dump(allHistory, json_file, indent=4)
+        with open(f'{self.modelSavePath}/training_score.json', 'w') as json_file:
+            json.dump(scores, json_file, indent=4)
 
     def plotTrainingHistory(self):
         # Define file paths
