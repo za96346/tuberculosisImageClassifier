@@ -65,7 +65,7 @@ class BaseModel(ModelInterface):
             self.datasetsDir,
             target_size=(self.imageSize[0], self.imageSize[1]),
             batch_size=batch_size,
-            class_mode='categorical',
+            class_mode='binary',
             subset='training',
             shuffle=True
         )
@@ -79,8 +79,6 @@ class BaseModel(ModelInterface):
 
         for i in range(len(train_generator)):
             x, y = train_generator[i]
-            y = np.argmax(y, axis=1)
-            y = np.expand_dims(y, axis=-1)
             x_data.append(x)
             y_data.append(y)
 
@@ -102,7 +100,7 @@ class BaseModel(ModelInterface):
             # 编译模型时确保 metrics 使用正确的参数
             model.compile(
                 optimizer=Adam(learning_rate=learning_rate),
-                loss=keras_cv.losses.FocalLoss(gamma=2., alpha=0.25),  # 如果你的输出是概率
+                # loss=keras_cv.losses.FocalLoss(gamma=2., alpha=0.25),  # 如果你的输出是概率
                 metrics=[
                     AUC(num_thresholds=200, curve="ROC",
                         summation_method="interpolation"),
