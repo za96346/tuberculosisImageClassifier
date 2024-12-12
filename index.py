@@ -32,7 +32,7 @@ for modelName, modelImplement in models.items():
         )
 
         if modelConfig[modelName]["traning"] and model:
-            model.startTraining(5, 20, 64)
+            model.startTraining(5, 20, 64, 1e-6)
 
         if modelConfig[modelName]["plotTrainingHistory"]:
             model.plotTrainingHistory()

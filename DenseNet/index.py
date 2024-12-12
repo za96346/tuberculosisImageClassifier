@@ -28,7 +28,7 @@ class ModelImplement(BaseModel):
 
         # 编译模型时确保 metrics 使用正确的参数
         model.compile(
-            optimizer=Adam(learning_rate=0.0001),
+            optimizer=Adam(learning_rate=self.learning_rate),
             loss=keras_cv.losses.FocalLoss(from_logits=False),  # 如果你的输出是概率
             metrics=[
                 AUC(num_thresholds=200, curve="ROC",

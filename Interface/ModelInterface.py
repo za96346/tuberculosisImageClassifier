@@ -30,7 +30,7 @@ class ModelInterface(ABC):
         pass
 
     @abstractmethod
-    def startTraining(self, num_folds, epochs, batch_size) -> None:
+    def startTraining(self, num_folds, epochs, batch_size, learning_rate) -> None:
         """
             開始訓練
             Argus

@@ -74,8 +74,9 @@ class BaseModel(ModelInterface):
                     batch_labels, dtype="float32").reshape(-1, 1)
                 yield images, batch_labels
 
-    def startTraining(self, num_folds, epochs, batch_size):
+    def startTraining(self, num_folds, epochs, batch_size, learning_rate):
         self.batch_size = batch_size
+        self.learning_rate = learning_rate
         # 讀取所有圖片路徑和標籤
         normal_images = glob(os.path.join(self.datasetsDir, 'Normal', '*.png'))
         tb_images = glob(
