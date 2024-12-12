@@ -79,6 +79,7 @@ class BaseModel(ModelInterface):
 
         for i in range(len(train_generator)):
             x, y = train_generator[i]
+            y = np.argmax(y, axis=1)
             x_data.append(x)
             y_data.append(y)
 
