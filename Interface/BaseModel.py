@@ -112,6 +112,9 @@ class BaseModel(ModelInterface):
 
             model.summary()
 
+            print("X_train => ", X_train)
+            print("Y_train => ", y_train)
+
             history = model.fit(
                 X_train,
                 y_train,
