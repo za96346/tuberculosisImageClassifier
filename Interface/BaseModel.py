@@ -135,8 +135,8 @@ class BaseModel(ModelInterface):
                 validation_data=val_generator,
                 epochs=epochs,
                 batch_size=batch_size,
-                steps_per_epoch=len(train_generator),
-                validation_steps=len(val_generator)
+                steps_per_epoch=len(train_paths) // batch_size,
+                validation_steps=len(val_paths) // batch_size
             )
 
             allHistory[fold] = history.history
