@@ -17,7 +17,7 @@ class ModelImplement(BaseModel):
             GlobalAveragePooling2D(),  # Global pooling层替代Flatten，减少参数数量
             Dense(1024, activation='relu'),
             Dropout(0.5),
-            Dense(1, activation='sigmoid')
+            Dense(2, activation='softmax')
         ])
 
         return model

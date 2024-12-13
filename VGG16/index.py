@@ -28,7 +28,7 @@ class ModelImplement(BaseModel):
             Flatten(),
             Dense(4096, activation='relu'),
             Dense(4096, activation='relu'),
-            Dense(1, activation='sigmoid')
+            Dense(2, activation='softmax')
         ])
 
         return model
