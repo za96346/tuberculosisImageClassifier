@@ -7,13 +7,12 @@ import gc
 import pandas as pd
 from .ModelInterface import ModelInterface
 import tensorflow as tf
-from sklearn.model_selection import KFold
 from keras.api.models import Sequential
 import matplotlib.pyplot as plt
 from keras.api.optimizers import Adam
 from keras.api.metrics import AUC, Accuracy, F1Score, PrecisionAtRecall
 import keras_cv
-from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import StratifiedKFold
 from keras._tf_keras.keras.preprocessing.image import ImageDataGenerator
 
 
@@ -83,17 +82,26 @@ class BaseModel(ModelInterface):
         all_image_path, all_labels = self.imagePreprocess()
 
         # KFold 交叉驗證
-        kf = KFold(n_splits=num_folds, shuffle=True, random_state=42)
+        skf = StratifiedKFold(n_splits=num_folds, shuffle=True, random_state=42)
 
         allHistory = {}
-        for  fold, (train_index, val_index) in enumerate(kf.split(all_image_path)):
+        for  fold, (train_index, val_index) in enumerate(skf.split(all_image_path, all_labels)):
             print(f'正在訓練第 {fold} 折...')
 
             # 分割訓練集與驗證集
             train_paths, val_paths = all_image_path[train_index], all_image_path[val_index]
             train_labels, val_labels = all_labels[train_index], all_labels[val_index]
 
-            datagen = ImageDataGenerator(rescale=1./255)
+            datagen = ImageDataGenerator(
+                rescale=1./255,
+                rotation_range=20,
+                width_shift_range=0.2,
+                height_shift_range=0.2,
+                shear_range=0.2,
+                zoom_range=0.2,
+                horizontal_flip=True,
+                fill_mode='nearest'
+            )
 
             train_generator = datagen.flow_from_dataframe(
                 dataframe=pd.DataFrame({'filename': train_paths, 'class': train_labels}),
